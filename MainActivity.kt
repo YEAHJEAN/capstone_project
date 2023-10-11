@@ -1,4 +1,4 @@
-package com.example.liroo
+package com.example.liroo // 프로젝트 이름 변경
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.liroo.ui.theme.MainActivity
+import com.example.liroo.ui.theme.MainActivity // 프로젝트 이름 변경
 import android.os.Handler
 import androidx.activity.compose.setContent
 
