@@ -16,20 +16,20 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-data class UserData(
+data class RegUserData(
     val id: String,
     val password: String,
     val email: String
 )
 
-data class ApiResponse(
+data class RegApiResponse(
     val success: Boolean,
     val message: String
 )
 
-interface MyApi {
+interface RegApi {
     @POST("register")
-    fun registerUser(@Body userData: UserData): Call<ApiResponse>
+    fun registerUser(@Body userData: RegUserData): Call<RegApiResponse>
 }
 
 class RegisterActivity : AppCompatActivity() {
@@ -38,52 +38,52 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
-        val editTextId = findViewById<EditText>(R.id.et_id)
-        val editTextPassword = findViewById<EditText>(R.id.et_pw)
-        val editTextEmail = findViewById<EditText>(R.id.et_email)
-        val editTextPasswordCheck = findViewById<EditText>(R.id.et_pc)
+        val regID = findViewById<EditText>(R.id.rg_id)
+        val regTextPassword = findViewById<EditText>(R.id.rg_pw)
+        val regTextEmail = findViewById<EditText>(R.id.rg_email)
+        val regTextPasswordCheck = findViewById<EditText>(R.id.rg_pc)
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
+            .baseUrl("http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/") // 실제 서버 URL로 변경
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        val api = retrofit.create(MyApi::class.java)
+        val api = retrofit.create(RegApi::class.java)
 
         val register = findViewById<Button>(R.id.btn_register)
         register.setOnClickListener {
-            val id = editTextId.text.toString()
-            val password = editTextPassword.text.toString()
-            val passwordCheck = editTextPasswordCheck.text.toString()
-            val email = editTextEmail.text.toString()
+            val id = regID.text.toString()
+            val password = regTextPassword.text.toString()
+            val passwordCheck = regTextPasswordCheck.text.toString()
+            val email = regTextEmail.text.toString()
 
             if (!isValidId(id)) {
-                editTextId.error = "유효한 아이디를 입력하세요 (영어와 숫자만 가능)"
+                regID.error = "영어, 숫자를 사용 (2~12자)를 입력해주세요."
                 return@setOnClickListener
             }
 
             if (!isValidPassword(password, passwordCheck)) {
-                editTextPassword.error = "유효한 비밀번호를 입력하세요 (8자 이상, 영어, 숫자, 특수문자만 가능)"
-                editTextPasswordCheck.error = "비밀번호가 일치하지 않습니다"
+                regTextPassword.error = "숫자, 문자, 특수문자 중 2가지 포함 (6~15자)를 입력해주세요."
+                regTextPasswordCheck.error = "비밀번호가 일치하지 않습니다."
                 return@setOnClickListener
             }
 
             if (!isValidEmail(email)) {
-                editTextEmail.error = "유효한 이메일을 입력하세요"
+                regTextEmail.error = "유효한 이메일을 입력해주세요."
                 return@setOnClickListener
             }
 
-            val userData = UserData(id, password, email)
+            val userData = RegUserData(id, password, email)
 
             val call = api.registerUser(userData)
 
-            call.enqueue(object : Callback<ApiResponse> {
-                override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+            call.enqueue(object : Callback<RegApiResponse> {
+                override fun onResponse(call: Call<RegApiResponse>, response: Response<RegApiResponse>) {
                     if (response.isSuccessful) {
                         val apiResponse = response.body()
                         if (apiResponse != null && apiResponse.success) {
                             // 회원가입 성공한 경우
                             showMessage("회원가입 성공!")
-                            val intent = Intent(this@RegisterActivity, MainActivity::class.java)
+                            val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
                             startActivity(intent)
 
                         } else {
@@ -92,11 +92,11 @@ class RegisterActivity : AppCompatActivity() {
                         }
                     } else {
                         // 서버에서 오류 응답을 받은 경우
-                        showMessage("서버 오류: ${response.code()}")
+                        showMessage("이미 사용중인 아이디 입니다.")
                     }
                 }
 
-                override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                override fun onFailure(call: Call<RegApiResponse>, t: Throwable) {
                     // 오류 처리
                     showMessage("오류 발생: " + t.message)
                 }
@@ -109,12 +109,12 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun isValidId(id: String): Boolean {
-        val regex = Regex("^[a-zA-Z0-9]*\$")
+        val regex = Regex("^[a-zA-Z0-9].{2,12}\$")
         return regex.matches(id)
     }
 
     private fun isValidPassword(password: String, passwordcheck: String): Boolean {
-        val regex = Regex("^[a-zA-Z0-9!@#\$%^&*()_+\\-=\\[\\]{};':\",./<>?]*$")
+        val regex = Regex("^[a-zA-Z0-9!@#\$%^&*()_+\\-=\\[\\]{};':\",./<>?].{6,15}$")
         return password.length >= 8 && password == passwordcheck && regex.matches(password)
     }
 
