@@ -6,26 +6,57 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions.DEFAULT_OPTIONS
+import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
+import retrofit2.http.POST
+
+interface ApiService {
+    @POST("saveToDatabase")
+    fun saveToDatabase(@Body data: YourDataModel): Call<Void>
+
+    companion object {
+        fun create(): ApiService {
+            val retrofit = Retrofit.Builder()
+                .baseUrl("http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/") // 여기에 Node.js 서버 URL을 입력합니다.
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+            return retrofit.create(ApiService::class.java)
+        }
+    }
+}
+
+data class YourDataModel(val text: String) // 여기에 데이터 모델을 정의합니다.
 
 class MainActivity : AppCompatActivity() {
     private val CAMERA_REQUEST_CODE = 100
     private val GALLERY_REQUEST_CODE = 101
+    private var extractedText: String = "" // 추출된 텍스트 저장 변수
+    private lateinit var editText: EditText // editText 변수 선언
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        editText = findViewById(R.id.editText) as EditText // editText 초기화
 
         val cameraButton = findViewById<Button>(R.id.cameraButton)
         val galleryButton = findViewById<Button>(R.id.galleryButton)
+        val saveButton = findViewById<Button>(R.id.saveButton) // Save 버튼 추가
 
         val imageView = findViewById<ImageView>(R.id.imageView)
         val textView = findViewById<TextView>(R.id.ocrResultTextView)
+        val editText = findViewById<EditText>(R.id.editText) // 텍스트 수정을 위한 EditText
 
         cameraButton.setOnClickListener {
             startCamera()
@@ -37,6 +68,23 @@ class MainActivity : AppCompatActivity() {
             startGallery()
             imageView.visibility = View.GONE // 이미지뷰 숨기기
             textView.visibility = View.GONE // 텍스트뷰 숨기기
+        }
+
+        saveButton.setOnClickListener {
+            // EditText에서 사용자가 수정한 텍스트를 추출하여 저장
+            val modifiedText = editText.text.toString()
+            extractedText = modifiedText
+
+            // 여기서 추출된 텍스트를 저장하고 필요한 후속 작업을 수행합니다.
+            // 예를 들어, 데이터베이스에 저장하거나 다른 처리를 할 수 있습니다.
+
+            // 수정된 텍스트를 텍스트뷰에 표시하여 사용자에게 보여줍니다.
+            textView.text = modifiedText
+            textView.visibility = View.VISIBLE
+            editText.visibility = View.GONE
+
+            // Save 버튼을 눌렀을 때 서버로 데이터를 전송하도록 처리합니다.
+            saveToDatabase(extractedText)
         }
     }
 
@@ -59,18 +107,45 @@ class MainActivity : AppCompatActivity() {
                     val imageBitmap = data?.extras?.get("data") as Bitmap
                     processImage(imageBitmap)
                 }
+
                 GALLERY_REQUEST_CODE -> {
                     val selectedImageUri = data?.data
-                    val imageBitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, selectedImageUri)
+                    val imageBitmap =
+                        MediaStore.Images.Media.getBitmap(this.contentResolver, selectedImageUri)
                     processImage(imageBitmap)
                 }
             }
         }
     }
 
+    private fun saveToDatabase(text: String) {
+        val apiService = ApiService.create()
+        val data = YourDataModel(text)
+
+        val call = apiService.saveToDatabase(data)
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    // 서버에 데이터가 성공적으로 저장됨
+                    showToast("데이터 저장 성공")
+                } else {
+                    // 서버에 데이터 저장 실패
+                    showToast("데이터 저장 실패")
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                // 통신 실패 처리
+                showToast("통신 실패")
+                t.printStackTrace()
+
+            }
+        })
+    }
+
     private fun processImage(bitmap: Bitmap) {
         val image = InputImage.fromBitmap(bitmap, 0)
-        val recognizer = TextRecognition.getClient(DEFAULT_OPTIONS)
+        val recognizer = TextRecognition.getClient(KoreanTextRecognizerOptions.Builder().build())
         val imageView = findViewById<ImageView>(R.id.imageView)
         val textView = findViewById<TextView>(R.id.ocrResultTextView)
 
@@ -84,6 +159,12 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+                extractedText = ocrText.toString() // 추출된 텍스트 저장
+                editText.setText(extractedText)
+                editText.visibility = View.VISIBLE
+
+                textView.visibility = View.GONE
+
                 textView.text = ocrText.toString()
                 textView.visibility = View.VISIBLE // 텍스트뷰 보이기
 
@@ -93,5 +174,9 @@ class MainActivity : AppCompatActivity() {
             .addOnFailureListener { e ->
                 e.printStackTrace()
             }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
     }
 }
