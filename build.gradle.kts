@@ -39,9 +39,6 @@ android {
 dependencies {
 
     implementation ("androidx.multidex:multidex:2.0.1")
-
-
-
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
@@ -53,4 +50,10 @@ dependencies {
     // Text features
     implementation ("com.google.mlkit:text-recognition:16.0.0")
     implementation ("com.google.mlkit:text-recognition-korean:16.0.0")
+
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.google.code.gson:gson:2.8.9")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+
 }
