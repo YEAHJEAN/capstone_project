@@ -1,6 +1,5 @@
 package com.example.liroo
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -39,7 +38,6 @@ class FragmentSetting : Fragment() {
     // SharedPreferences 파일명
     val PREFERENCE = "com.example.liroo"
 
-    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -50,27 +48,24 @@ class FragmentSetting : Fragment() {
         val id = sharedPref?.getString("id", "") ?: ""
         val email = sharedPref?.getString("email", "") ?: ""
 
-        val idEditText = view.findViewById<EditText>(R.id.idEditText)
         val emailEditText = view.findViewById<EditText>(R.id.emailEditText)
         val saveButton = view.findViewById<Button>(R.id.saveButton)
-        val userInfoTextView = view.findViewById<TextView>(R.id.userInfoTextView) // 추가
+        val userInfoTextView = view.findViewById<TextView>(R.id.userInfoTextView)
 
-        idEditText.text = Editable.Factory.getInstance().newEditable(id)
         emailEditText.text = Editable.Factory.getInstance().newEditable(email)
-        userInfoTextView.text = "ID: $id\nEmail: $email" // 추가
+        userInfoTextView.text = "ID: $id\nEmail: $email"
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
+            .baseUrl("http://10.0.2.2:3001/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
         val api = retrofit.create(UpdateApi::class.java)
 
         saveButton.setOnClickListener {
-            val newId = idEditText.text.toString()
             val newEmail = emailEditText.text.toString()
 
-            val userData = UpdateUserData(newId, newEmail)
+            val userData = UpdateUserData(id, newEmail)
 
             val call = api.updateUser(userData)
 
@@ -79,26 +74,21 @@ class FragmentSetting : Fragment() {
                     if (response.isSuccessful) {
                         val apiResponse = response.body()
                         if (apiResponse != null && apiResponse.success) {
-                            // 정보 수정 성공한 경우
                             val editor = sharedPref?.edit()
-                            editor?.putString("id", newId)
                             editor?.putString("email", newEmail)
                             editor?.apply()
                             showMessage("정보 수정 성공!")
 
-                            userInfoTextView.text = "ID: $newId\nEmail: $newEmail" // 추가
+                            userInfoTextView.text = "ID: $id\nEmail: $newEmail"
                         } else {
-                            // 서버에서 성공하지 않은 응답을 받은 경우
                             showMessage("정보 수정 실패")
                         }
                     } else {
-                        // 서버에서 오류 응답을 받은 경우
                         showMessage("정보 수정 실패")
                     }
                 }
 
                 override fun onFailure(call: Call<RegApiResponseS>, t: Throwable) {
-                    // 오류 처리
                     showMessage("오류 발생: " + t.message)
                 }
             })
