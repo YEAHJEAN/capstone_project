@@ -120,39 +120,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadUserInfo(api: LoginApi) {
-        val sharedPref = getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE)
-        val id = sharedPref.getString("id", null)
-        val password = sharedPref.getString("password", null)
-        val email = sharedPref.getString("email", null)
-
-        if (id != null && password != null && email != null) {
-            val call = api.getUserInfo("$id:$password")
-
-            call.enqueue(object : Callback<UserInfo> {
-                override fun onResponse(call: Call<UserInfo>, response: Response<UserInfo>) {
-                    if (response.isSuccessful) {
-                        val userInfo = response.body()
-                        if (userInfo != null) {
-                            showMessage("사용자 정보: ID - ${userInfo.id}, 이메일 - ${userInfo.email}")
-                            // 기타 필요한 정보를 출력
-                        } else {
-                            showMessage("사용자 정보를 불러오는데 실패했습니다.")
-                        }
-                    } else {
-                        showMessage("오류 발생")
-                    }
-                }
-
-                override fun onFailure(call: Call<UserInfo>, t: Throwable) {
-                    showMessage("오류 발생: " + t.message)
-                }
-            })
-        } else {
-            showMessage("로그인 정보가 없습니다.")
-        }
-    }
-
     // SharedPreferences에 로그인한 사용자의 ID, 비밀번호, 이메일 저장
     private fun saveUserInfo(id: String, password: String, email: String) {
         val sharedPref = getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE)

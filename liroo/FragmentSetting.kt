@@ -1,5 +1,6 @@
 package com.example.liroo
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -38,6 +39,7 @@ class FragmentSetting : Fragment() {
     // SharedPreferences 파일명
     val PREFERENCE = "com.example.liroo"
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
