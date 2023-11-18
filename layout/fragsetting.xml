@@ -6,22 +6,35 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/userInfoLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="사용자 정보"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
         android:id="@+id/userInfoTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
-        android:textSize="25sp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/userInfoLabel"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/idEditText"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/updateInfoLabel"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/userInfoTextView"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:text="사용자 정보 수정"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:layout_marginTop="60dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userInfoTextView" />
 
     <EditText
         android:id="@+id/emailEditText"
@@ -29,7 +42,7 @@
         android:layout_height="wrap_content"
         android:hint="Email"
         android:inputType="textEmailAddress"
-        app:layout_constraintTop_toBottomOf="@id/idEditText"
+        app:layout_constraintTop_toBottomOf="@id/updateInfoLabel"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
@@ -37,7 +50,7 @@
         android:id="@+id/saveButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save"
+        android:text="변경하기"
         app:layout_constraintTop_toBottomOf="@id/emailEditText"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
