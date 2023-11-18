@@ -1,0 +1,187 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const mysql = require('mysql2');
+const app = express();
+const port = 3001;
+
+app.use(bodyParser.json());
+
+// MySQL 연결 설정
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '12345678',
+  database: 'users'
+});
+
+// MySQL 연결
+db.connect((err) => {
+  if (err) {
+    console.error('MySQL 연결 실패: ' + err.message);
+  } else {
+    console.log('MySQL에 연결되었습니다.');
+  }
+});
+
+
+// 사용자 등록 엔드포인트
+app.post('/register', (req, res) => {
+  const userData = req.body;
+
+  // 간단한 유효성 검사
+  if (!userData.id || !userData.password || !userData.email) {
+    return res.status(400).json({ success: false, message: '누락된 데이터가 있습니다.' });
+  }
+
+  // 이미 존재하는 아이디인지 확인
+  db.query('SELECT * FROM users WHERE id = ?', [userData.id], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: '서버 오류' });
+    }
+
+    if (results.length > 0) {
+      // 이미 등록된 아이디가 존재하는 경우
+      return res.status(409).json({ success: false, message: '이미 등록된 아이디입니다.' });
+    }
+
+    // 새로운 사용자를 데이터베이스에 추가
+    db.query('INSERT INTO users (id, password, email) VALUES (?, ?, ?)', [userData.id, userData.password, userData.email], (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: '서버 오류' });
+      }
+
+      res.status(201).json({ success: true, message: '회원가입이 성공했습니다.' });
+    });
+  });
+});
+
+
+// 사용자 로그인 엔드포인트
+app.post('/login', (req, res) => {
+  const userData = req.body;
+
+  // 간단한 유효성 검사
+  if (!userData.id || !userData.password) {
+    return res.status(400).json({ success: false, message: '누락된 데이터가 있습니다.' });
+  }
+
+  // 사용자 아이디와 비밀번호를 데이터베이스에서 확인
+  db.query('SELECT * FROM users WHERE id = ? AND password = ?', [userData.id, userData.password], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: '서버 오류' });
+    }
+
+    if (results.length === 0) {
+      // 일치하는 사용자가 없는 경우
+      return res.status(401).json({ success: false, message: '아이디 또는 비밀번호가 잘못되었습니다.' });
+    }
+
+    // 로그인 성공
+    res.status(200).json({ success: true, message: '로그인 성공' });
+  });
+});
+
+
+// 사용자 정보 불러오기 엔드포인트
+app.get('/user_info', (req, res) => {
+  const userInfo = req.headers.authorization.split(':'); // Authorization 헤더에서 id와 password 분리
+  const id = userInfo[0];
+  const password = userInfo[1];
+
+  // 아이디와 비밀번호로 사용자 정보를 데이터베이스에서 확인
+  db.query('SELECT * FROM users WHERE id = ? AND password = ?', [id, password], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: '서버 오류' });
+    }
+
+    if (results.length === 0) {
+      // 일치하는 사용자가 없는 경우
+      return res.status(401).json({ success: false, message: '아이디 또는 비밀번호가 잘못되었습니다.' });
+    }
+
+    // 사용자 정보 전달
+    const user = results[0];
+    res.status(200).json({ success: true, id: user.id, password: user.password, email: user.email });
+  });
+});
+
+
+// 사용자 정보 변경 엔드포인트
+app.post('/update', (req, res) => {
+  const updateData = req.body;
+
+  // 유효성 검사
+  if (!updateData.id || !updateData.email) {
+    return res.status(400).json({ success: false, message: '누락된 데이터가 있습니다.' });
+  }
+
+  // 사용자 아이디로 구성된 사용자 정보를 데이터베이스에서 확인
+  db.query('SELECT * FROM users WHERE id = ?', [updateData.id], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: '서버 오류' });
+    }
+
+    if (results.length === 0) {
+      // 일치하는 사용자가 없는 경우
+      return res.status(401).json({ success: false, message: '일치하는 사용자 정보가 없습니다.' });
+    }
+
+    // 사용자 정보 업데이트
+    db.query('UPDATE users SET email = ? WHERE id = ?', [updateData.email, updateData.id], (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: '서버 오류' });
+      }
+
+      res.status(200).json({ success: true, message: '사용자 정보가 업데이트되었습니다.' });
+    });
+  });
+});
+
+
+// 게시글 작성 엔드포인트
+app.post('/posts/create', (req, res) => {
+  const postData = req.body;
+
+  // 간단한 유효성 검사
+  if (!postData.Id || !postData.title || !postData.content) {
+    return res.status(400).json({ success: false, message: 'ID, 제목 또는 내용이 누락되었습니다.' });
+  }
+
+  // 현재 시간을 MySQL DATETIME 포맷으로 변환
+  const createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+  // 게시글을 데이터베이스에 추가
+  db.query('INSERT INTO posts (id, title, content, created_at) VALUES (?, ?, ?, ?)', [postData.Id, postData.title, postData.content, createdAt], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: '서버 오류' });
+    }
+
+    res.status(201).json({ success: true, message: '게시글이 작성되었습니다.' });
+  });
+});
+
+
+// 모든 게시글 가져오기 엔드포인트
+app.get('/posts', (req, res) => {
+  // 모든 게시글을 데이터베이스에서 가져오기
+  db.query('SELECT * FROM posts', (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: '서버 오류' });
+    }
+
+    res.status(200).json({ success: true, posts: results });
+  });
+});
+
+
+app.listen(port, () => {
+  console.log(`서버가 http://localhost:${port} 포트에서 실행 중입니다.`);
+});
