@@ -4,7 +4,9 @@ const mysql = require('mysql2');
 const app = express();
 const port = 3001;
 
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
 
 // MySQL 연결 설정
 const db = mysql.createConnection({
@@ -149,7 +151,7 @@ app.post('/posts/create', (req, res) => {
   const postData = req.body;
 
   // 간단한 유효성 검사
-  if (!postData.Id || !postData.title || !postData.content) {
+  if (!postData.id || !postData.title || !postData.content) {
     return res.status(400).json({ success: false, message: 'ID, 제목 또는 내용이 누락되었습니다.' });
   }
 
@@ -157,10 +159,10 @@ app.post('/posts/create', (req, res) => {
   const createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
   // 게시글을 데이터베이스에 추가
-  db.query('INSERT INTO posts (id, title, content, created_at) VALUES (?, ?, ?, ?)', [postData.Id, postData.title, postData.content, createdAt], (error, results) => {
+  db.query('INSERT INTO posts (id, title, content, created_at) VALUES (?, ?, ?, ?)', [postData.id, postData.title, postData.content, createdAt], (error, results) => {
     if (error) {
       console.error(error);
-      return res.status(500).json({ success: false, message: '서버 오류' });
+      return res.status(500).json({ success: false, message: '게시글 작성 중 오류가 발생했습니다.' });
     }
 
     res.status(201).json({ success: true, message: '게시글이 작성되었습니다.' });
@@ -170,6 +172,7 @@ app.post('/posts/create', (req, res) => {
 
 // 모든 게시글 가져오기 엔드포인트
 app.get('/posts', (req, res) => {
+
   // 모든 게시글을 데이터베이스에서 가져오기
   db.query('SELECT * FROM posts', (error, results) => {
     if (error) {
@@ -177,8 +180,24 @@ app.get('/posts', (req, res) => {
       return res.status(500).json({ success: false, message: '서버 오류' });
     }
 
-    res.status(200).json({ success: true, posts: results });
+      res.status(200).json(results);
   });
+});
+
+app.post('/saveToDatabase', (req, res) => {
+    const text = req.body.text;
+
+    // MySQL에 정보 삽입
+    const sql = `INSERT INTO texts (text) VALUES ('${text}')`;
+    db.query(sql, (err, result) => {
+    if (err) {
+      console.error('Error saving data to database:', err);
+      res.status(500).send('Error saving data to database');
+      return;
+    }
+      console.log('Data saved to database');
+      res.status(200).send('Data saved to database');
+    });
 });
 
 
