@@ -4,18 +4,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F0EBCE"
     tools:context=".RegisterActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="85dp"
+        android:ems="10"
+        android:textStyle="bold"
+        android:text="Liroo"
+        android:textAlignment="center"
+        android:textSize="70sp"
+        android:textColor="#395144"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
 
     <EditText
         android:id="@+id/rg_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="220dp"
         android:layout_marginEnd="8dp"
         android:ems="10"
         android:hint="아이디"
         android:inputType="text"
+        android:textColor="#395144"
+        android:textColorHint="#395144"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -28,6 +49,9 @@
         android:ems="10"
         android:hint="이메일"
         android:inputType="textEmailAddress"
+        android:textColor="#395144"
+        android:textColorHint="#395144"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="@+id/rg_id"
         app:layout_constraintStart_toStartOf="@+id/rg_id"
         app:layout_constraintTop_toBottomOf="@+id/rg_id" />
@@ -40,6 +64,9 @@
         android:ems="10"
         android:hint="비밀번호"
         android:inputType="textPassword"
+        android:textColor="#395144"
+        android:textColorHint="#395144"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="@+id/rg_email"
         app:layout_constraintStart_toStartOf="@+id/rg_email"
         app:layout_constraintTop_toBottomOf="@+id/rg_email" />
@@ -52,6 +79,9 @@
         android:ems="10"
         android:hint="비밀번호 확인"
         android:inputType="textPassword"
+        android:textColor="#395144"
+        android:textColorHint="#395144"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="@+id/rg_pw"
         app:layout_constraintStart_toStartOf="@+id/rg_pw"
         app:layout_constraintTop_toBottomOf="@+id/rg_pw" />
@@ -61,7 +91,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
+        android:backgroundTint="#AA8B56"
         android:text="회원가입"
+        android:textColor="#395144"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="@+id/rg_pc"
         app:layout_constraintStart_toStartOf="@+id/rg_pc"
         app:layout_constraintTop_toBottomOf="@+id/rg_pc" />

@@ -23,7 +23,7 @@
         <ImageButton
             android:id="@+id/btn_home"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_weight="1"
             android:src="@drawable/baseline_home_white_24"
             android:scaleType="fitCenter"
@@ -32,16 +32,25 @@
         <ImageButton
             android:id="@+id/btn_search"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_weight="1"
             android:src="@drawable/baseline_search_white_24"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"/>
 
         <ImageButton
+            android:id="@+id/btn_cam"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:src="@drawable/baseline_photo_camera_white_24"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"/>
+
+        <ImageButton
             android:id="@+id/btn_post"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_weight="1"
             android:src="@drawable/baseline_post_white_24"
             android:scaleType="fitCenter"
@@ -50,7 +59,7 @@
         <ImageButton
             android:id="@+id/btn_setting"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_weight="1"
             android:src="@drawable/baseline_settings_white_24"
             android:scaleType="fitCenter"
