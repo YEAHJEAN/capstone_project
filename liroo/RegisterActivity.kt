@@ -17,6 +17,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+
 data class RegUserData(
     val id: String,
     val password: String,
@@ -35,7 +38,19 @@ interface RegApi {
 
 class RegisterActivity : AppCompatActivity() {
     // SharedPreferences 파일명
-    val PREFERENCE = "com.example.liroo"
+    private fun hashPassword(password: String): String {
+        val bytes = password.toByteArray()
+        val md: MessageDigest
+        return try {
+            md = MessageDigest.getInstance("SHA-256")
+            val digest = md.digest(bytes)
+            digest.fold("", { str, it -> str + "%02x".format(it) })
+        } catch (e: NoSuchAlgorithmException) {
+            e.printStackTrace()
+            ""
+        }
+    }
+    val PREFERENCE = "com.example.liroo3"
 
     @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +75,9 @@ class RegisterActivity : AppCompatActivity() {
             val passwordCheck = regTextPasswordCheck.text.toString()
             val email = regTextEmail.text.toString()
 
+            val hashedPassword = hashPassword(password) // 비밀번호를 해싱하여 저장
+
+
             if (!isValidId(id)) {
                 regId.error = "영어, 숫자를 사용 (2~12자)를 입력해주세요."
                 return@setOnClickListener
@@ -76,7 +94,7 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val userData = RegUserData(id, password, email)
+            val userData = RegUserData(id, hashPassword(password), email)
 
             val call = api.registerUser(userData)
 
@@ -111,9 +129,11 @@ class RegisterActivity : AppCompatActivity() {
     // SharedPreferences에 사용자 정보 저장
     private fun saveUserInfo(id: String, password: String, email: String) {
         val sharedPref = getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE)
+        val hashedPassword = hashPassword(password) // 비밀번호를 해싱하여 저장
+
         with(sharedPref.edit()) {
             putString("id", id)
-            putString("password", password)
+            putString("password", hashedPassword)
             putString("email", email)
             apply()
         }

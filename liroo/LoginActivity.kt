@@ -13,6 +13,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+import java.security.MessageDigest
 import java.util.regex.Pattern
 
 data class LoginUserData(
@@ -40,8 +41,13 @@ interface LoginApi {
 }
 
 class LoginActivity : AppCompatActivity() {
+    private fun hashPassword(password: String): String {
+        val bytes = password.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        return digest.fold("", { str, it -> str + "%02x".format(it) })
+    }
 
-    // SharedPreferences 파일명
     val PREFERENCE = "com.example.liroo"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,14 +69,15 @@ class LoginActivity : AppCompatActivity() {
         btnLogin.setOnClickListener {
             val id = loginID.text.toString()
             val password = loginPassword.text.toString()
+            val hashedPassword = hashPassword(password) // 입력된 비밀번호를 해싱
 
             if (!isValidPassword(password)) {
                 loginPassword.error = "숫자, 문자, 특수문자 중 2가지 포함(6~15자)를 입력해주세요."
                 return@setOnClickListener
             }
 
-            val userData = LoginUserData(id, password)
-            val call = api.loginUser(userData)
+            val userData = LoginUserData(id, hashedPassword) // 해싱된 비밀번호로 객체 생성
+            val call = api.loginUser(userData) // 해싱된 비밀번호 객체를 서버로 전송
 
             call.enqueue(object : Callback<LoginApiResponse> {
                 override fun onResponse(call: Call<LoginApiResponse>, response: Response<LoginApiResponse>) {
@@ -79,15 +86,13 @@ class LoginActivity : AppCompatActivity() {
                         if (apiResponse != null && apiResponse.success) {
                             showMessage("로그인 성공!")
 
-                            // 로그인 성공 후 사용자 정보 불러오기
-                            val callUserInfo = api.getUserInfo("$id:$password")
+                            val callUserInfo = api.getUserInfo("$id:$hashedPassword") // 해싱된 비밀번호로 사용자 정보 가져오기
 
                             callUserInfo.enqueue(object : Callback<UserInfo> {
                                 override fun onResponse(call: Call<UserInfo>, response: Response<UserInfo>) {
                                     val userInfo = response.body()
                                     if (userInfo != null) {
-                                        // 사용자 정보를 불러온 후, ID, 비밀번호, 이메일을 저장
-                                        saveUserInfo(userInfo.id, userInfo.password, userInfo.email)
+                                        saveUserInfo(userInfo.id, hashedPassword, userInfo.email)
                                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
                                         startActivity(intent)
                                     } else {
@@ -111,7 +116,6 @@ class LoginActivity : AppCompatActivity() {
                     showMessage("오류 발생")
                 }
             })
-
         }
 
         btnRegister.setOnClickListener {
@@ -120,7 +124,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    // SharedPreferences에 로그인한 사용자의 ID, 비밀번호, 이메일 저장
     private fun saveUserInfo(id: String, password: String, email: String) {
         val sharedPref = getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
@@ -130,7 +133,6 @@ class LoginActivity : AppCompatActivity() {
             apply()
         }
     }
-
 
     private fun isValidPassword(password: String): Boolean {
         val pattern = "^(?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*]).{6,15}$"

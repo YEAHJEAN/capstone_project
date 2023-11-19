@@ -3,6 +3,7 @@ package com.example.liroo
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -56,7 +57,7 @@ class FragmentSetting : Fragment() {
         userInfoTextView.text = "ID: $id\nEmail: $email"
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3001/")
+            .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -64,6 +65,11 @@ class FragmentSetting : Fragment() {
 
         saveButton.setOnClickListener {
             val newEmail = emailEditText.text.toString()
+
+            if (!isValidEmail(newEmail)) {
+                emailEditText.error = "유효한 이메일을 입력해주세요."
+                return@setOnClickListener
+            }
 
             val userData = UpdateUserData(id, newEmail)
 
@@ -99,5 +105,8 @@ class FragmentSetting : Fragment() {
 
     private fun showMessage(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+    private fun isValidEmail(email: String): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 }

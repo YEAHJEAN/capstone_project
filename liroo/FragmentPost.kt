@@ -2,6 +2,8 @@ package com.example.liroo
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +20,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 data class PostData(
-    val Id: String,
+    val id: String,
     val title: String,
     val content: String
 )
@@ -62,12 +64,12 @@ class FragmentPost : Fragment() {
 
         postButton.setOnClickListener {
             val pref = this.activity?.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE)
-            val Id = pref?.getString("id", "") // 로그인한 사용자의 ID를 가져옴
+            val id = pref?.getString("id", "") // 로그인한 사용자의 ID를 가져옴
             val title = titleEditText.text.toString()
             val content = contentEditText.text.toString()
 
-            if (Id != null && Id.isNotEmpty() && title.isNotEmpty() && content.isNotEmpty()) {
-                val postData = PostData(Id, title, content) // PostData에 Id, title, content 추가
+            if (id != null && id.isNotEmpty() && title.isNotEmpty() && content.isNotEmpty()) {
+                val postData = PostData(id, title, content)
 
                 val call = postApi.createPost(postData)
 
@@ -77,6 +79,9 @@ class FragmentPost : Fragment() {
                             val apiResponse = response.body()
                             if (apiResponse != null && apiResponse.success) {
                                 showMessage("게시글이 작성되었습니다.")
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    MainActivity.instance?.setFrag(0)
+                                }, 500)
                             } else {
                                 showMessage("게시글 작성 실패")
                             }
