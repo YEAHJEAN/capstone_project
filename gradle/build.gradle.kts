@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "com.example.liroo"
     compileSdk = 34
+    buildFeatures.viewBinding = true
 
     defaultConfig {
         applicationId = "com.example.liroo"
@@ -55,6 +56,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.google.code.gson:gson:2.8.9")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
@@ -77,5 +79,10 @@ dependencies {
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // Text features
+    implementation ("com.google.mlkit:text-recognition:16.0.0")
+    implementation ("com.google.mlkit:text-recognition-korean:16.0.0")
+
+    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
 
 }
