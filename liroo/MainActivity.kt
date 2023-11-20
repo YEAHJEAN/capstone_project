@@ -46,19 +46,19 @@ class MainActivity : AppCompatActivity() {
         when(fragNum)
         {
             0 -> {
-                ft.replace(R.id.main_frame, FragmentHome()).commit()
+                ft.replace(R.id.container, FragmentHome()).commit()
             }
             1 -> {
-                ft.replace(R.id.main_frame, FragmentSearch()).commit()
+                ft.replace(R.id.container, FragmentSearch()).commit()
             }
             2 -> {
-                ft.replace(R.id.main_frame, FragmentCam()).commit()
+                ft.replace(R.id.container, FragmentCam()).commit()
             }
             3 -> {
-                ft.replace(R.id.main_frame, FragmentPost()).commit()
+                ft.replace(R.id.container, FragmentPost()).commit()
             }
             4 -> {
-                ft.replace(R.id.main_frame, FragmentSetting()).commit()
+                ft.replace(R.id.container, FragmentSetting()).commit()
             }
         }
     }

@@ -4,13 +4,10 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -59,60 +56,29 @@ class FragmentSetting : Fragment() {
         val id = sharedPref?.getString("id", "") ?: ""
         val email = sharedPref?.getString("email", "") ?: ""
 
-        val emailEditText = view.findViewById<EditText>(R.id.emailEditText)
-        val saveButton = view.findViewById<Button>(R.id.saveButton)
         val deleteButton = view.findViewById<Button>(R.id.deleteButton)
+        val logoutButton = view.findViewById<Button>(R.id.logoutButton)
         val userIDTextView = view.findViewById<TextView>(R.id.userIDTextView)
         val userEmailTextView = view.findViewById<TextView>(R.id.userEmailTextView)
+        val emailEditButton = view.findViewById<Button>(R.id.emailEditButton)
 
-        emailEditText.text = Editable.Factory.getInstance().newEditable(email)
         userIDTextView.text = "$id 님"
         userEmailTextView.text = "이메일 : $email"
+
+        emailEditButton.setOnClickListener {
+            val fragmentManager = activity?.supportFragmentManager
+            val fragmentTransaction = fragmentManager?.beginTransaction()
+            fragmentTransaction?.replace(R.id.container, UpdateEmailFragment())
+            fragmentTransaction?.addToBackStack(null)
+            fragmentTransaction?.commit()
+        }
 
         val retrofit = Retrofit.Builder()
             .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        val updateApi = retrofit.create(UpdateApi::class.java)
         val deleteApi = retrofit.create(DeleteApi::class.java)
-
-        saveButton.setOnClickListener {
-            val newEmail = emailEditText.text.toString()
-
-            if (!isValidEmail(newEmail)) {
-                emailEditText.error = "유효한 이메일을 입력해주세요."
-                return@setOnClickListener
-            }
-
-            val userData = UpdateUserData(id, newEmail)
-
-            val call = updateApi.updateUser(userData)
-
-            call.enqueue(object : Callback<RegApiResponseS> {
-                override fun onResponse(call: Call<RegApiResponseS>, response: Response<RegApiResponseS>) {
-                    if (response.isSuccessful) {
-                        val apiResponse = response.body()
-                        if (apiResponse != null && apiResponse.success) {
-                            val editor = sharedPref?.edit()
-                            editor?.putString("email", newEmail)
-                            editor?.apply()
-                            showMessage("정보 수정 성공!")
-
-                            userEmailTextView.text = "이메일: $newEmail"
-                        } else {
-                            showMessage("정보 수정 실패")
-                        }
-                    } else {
-                        showMessage("정보 수정 실패")
-                    }
-                }
-
-                override fun onFailure(call: Call<RegApiResponseS>, t: Throwable) {
-                    showMessage("오류 발생: " + t.message)
-                }
-            })
-        }
 
         deleteButton.setOnClickListener {
             // AlertDialog Builder 객체 생성
@@ -157,15 +123,32 @@ class FragmentSetting : Fragment() {
             alert.show()
         }
 
+        logoutButton.setOnClickListener {
+            // AlertDialog Builder 객체 생성
+            val builder = AlertDialog.Builder(context)
+            builder.setMessage("로그아웃 하시겠습니까?")
+                .setCancelable(false)
+                .setPositiveButton("확인") { dialog, buttonId ->
+                    // 확인 버튼을 눌렀을 때의 동작
+                    sharedPref?.edit()?.clear()?.apply()
+                    showMessage("로그아웃 되었습니다.")
+                    val intent = Intent(context, LoginActivity::class.java)
+                    startActivity(intent)
+                    activity?.finish()
+                }
+                .setNegativeButton("취소") { dialog, buttonId ->
+                    // 취소 버튼을 눌렀을 때의 동작
+                    dialog.cancel()
+                }
+            // AlertDialog 객체 생성 및 표시
+            val alert = builder.create()
+            alert.show()
+        }
 
         return view
     }
 
     private fun showMessage(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun isValidEmail(email: String): Boolean {
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 }
