@@ -36,6 +36,7 @@
         android:textColor="#395144"
         android:textColorHint="#395144"
         android:textSize="18sp"
+        android:backgroundTint="#395144"
         app:layout_constraintEnd_toEndOf="@+id/textView"
         app:layout_constraintStart_toStartOf="@+id/textView"
         app:layout_constraintTop_toBottomOf="@+id/textView"
@@ -52,6 +53,7 @@
         android:textColor="#395144"
         android:textColorHint="#395144"
         android:textSize="18sp"
+        android:backgroundTint="#395144"
         app:layout_constraintEnd_toEndOf="@+id/id"
         app:layout_constraintStart_toStartOf="@+id/id"
         app:layout_constraintTop_toBottomOf="@+id/id" />

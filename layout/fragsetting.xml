@@ -24,10 +24,12 @@
         android:text="로그아웃"
         app:layout_constraintBottom_toBottomOf="@+id/userIDTextView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/userIDTextView"
         app:layout_constraintTop_toTopOf="@+id/userIDTextView" />
 
     <View
-        android:id="@+id/divider"
+        android:id="@+id/divider1"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="30dp"
@@ -43,11 +45,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="30dp"
-        android:text="계정 정보"
+        android:text="프로필 관리"
         android:textColor="@android:color/white"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider" />
+        app:layout_constraintTop_toBottomOf="@+id/divider1" />
 
     <TextView
         android:id="@+id/userEmailTextView"
@@ -70,6 +72,26 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/userEmailTextView"
         app:layout_constraintTop_toTopOf="@+id/userEmailTextView" />
+
+    <Button
+        android:id="@+id/passwordEditButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="변경하기"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/emailEditButton" />
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="30dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/passwordEditButton" />
 
     <Button
         android:id="@+id/deleteButton"
