@@ -50,7 +50,7 @@ class RegisterActivity : AppCompatActivity() {
             ""
         }
     }
-    val PREFERENCE = "com.example.liroo3"
+    val PREFERENCE = "com.example.liroo"
 
     @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {

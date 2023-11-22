@@ -16,7 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-data class UpdateUserEmailData(
+data class UpdateEmailDataE(
     val id: String,
     val email: String
 )
@@ -27,8 +27,8 @@ data class RegApiResponseE(
 )
 
 interface UpdateEmailApi {
-    @POST("update")
-    fun updateUser(@Body userData: UpdateUserEmailData): Call<RegApiResponseE>
+    @POST("change_email")
+    fun updateUser(@Body userData: UpdateEmailDataE): Call<RegApiResponseE>
 }
 
 class UpdateEmailFragment : Fragment() {
@@ -63,7 +63,7 @@ class UpdateEmailFragment : Fragment() {
                 .build()
 
             val UpdateEmailApi = retrofit.create(UpdateEmailApi::class.java)
-            val userData = UpdateUserEmailData(id, newEmail)
+            val userData = UpdateEmailDataE(id, newEmail)
 
             val call = UpdateEmailApi.updateUser(userData)
 
@@ -78,7 +78,7 @@ class UpdateEmailFragment : Fragment() {
                             showMessage("정보 수정 성공!")
 
                             // 이전 화면으로 돌아가기
-                            fragmentManager?.popBackStack()
+                            activity?.supportFragmentManager?.popBackStack()
                         } else {
                             showMessage("정보 수정 실패")
                         }

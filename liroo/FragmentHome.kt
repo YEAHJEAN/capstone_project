@@ -14,7 +14,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import java.util.Collections
 
 data class Post(
     val id: String,
@@ -57,10 +56,8 @@ class FragmentHome : Fragment() {
                 if (response.isSuccessful) {
                     val posts = response.body()
                     posts?.let {
-                        // 리스트를 역순으로 정렬
-                        Collections.reverse(it)
-
-                        val adapter = PostAdapter(requireContext(), it)
+                        val reversedList = it.reversed()
+                        val adapter = PostAdapter(requireContext(), reversedList)
                         recyclerView.adapter = adapter
                     }
                 } else {

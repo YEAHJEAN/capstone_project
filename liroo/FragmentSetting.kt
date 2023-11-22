@@ -1,5 +1,6 @@
 package com.example.liroo
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -19,11 +20,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-data class UpdateUserData(
-    val id: String,
-    val email: String
-)
-
 data class DeleteUserData(
     val id: String
 )
@@ -33,11 +29,6 @@ data class RegApiResponseS(
     val message: String
 )
 
-interface UpdateApi {
-    @POST("update")
-    fun updateUser(@Body userData: UpdateUserData): Call<RegApiResponseS>
-}
-
 interface DeleteApi {
     @POST("delete")
     fun deleteUser(@Body userData: DeleteUserData): Call<RegApiResponseS>
@@ -46,6 +37,7 @@ interface DeleteApi {
 class FragmentSetting : Fragment() {
     val PREFERENCE = "com.example.liroo"
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -61,6 +53,7 @@ class FragmentSetting : Fragment() {
         val userIDTextView = view.findViewById<TextView>(R.id.userIDTextView)
         val userEmailTextView = view.findViewById<TextView>(R.id.userEmailTextView)
         val emailEditButton = view.findViewById<Button>(R.id.emailEditButton)
+        val passwordEditButton = view.findViewById<Button>(R.id.passwordEditButton)
 
         userIDTextView.text = "$id 님"
         userEmailTextView.text = "이메일 : $email"
@@ -69,6 +62,14 @@ class FragmentSetting : Fragment() {
             val fragmentManager = activity?.supportFragmentManager
             val fragmentTransaction = fragmentManager?.beginTransaction()
             fragmentTransaction?.replace(R.id.container, UpdateEmailFragment())
+            fragmentTransaction?.addToBackStack(null)
+            fragmentTransaction?.commit()
+        }
+
+        passwordEditButton.setOnClickListener {
+            val fragmentManager = activity?.supportFragmentManager
+            val fragmentTransaction = fragmentManager?.beginTransaction()
+            fragmentTransaction?.replace(R.id.container, UpdatePasswordFragment())
             fragmentTransaction?.addToBackStack(null)
             fragmentTransaction?.commit()
         }

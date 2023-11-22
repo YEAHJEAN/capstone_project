@@ -1,5 +1,6 @@
 package com.example.liroo
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -36,57 +37,102 @@ interface ApiService {
     }
 }
 
-data class YourDataModel(val text: String) // 여기에 데이터 모델을 정의합니다.
+data class YourDataModel(val userid: String, val texts: List<TextData>)
+
+data class TextData(val title: String, val author: String)
+
 
 class FragmentCam : Fragment() {
     private val CAMERA_REQUEST_CODE = 100
     private val GALLERY_REQUEST_CODE = 101
-    private var extractedText: String = "" // 추출된 텍스트 저장 변수
-    private lateinit var editText: EditText // editText 변수 선언
+    private var extractedText: String = ""
+    private lateinit var editText: EditText
+
+    private lateinit var editTextContainer: LinearLayout
+
+    private val titleEditTexts = ArrayList<EditText>() // 제목 EditText 리스트
+    private val authorEditTexts = ArrayList<EditText>() // 저자 EditText 리스트
+
+    private val PREFERENCE = "com.example.liroo"
+
+    private var pairCounter = 2 // 한 번에 추가되는 EditText 쌍의 개수를 정하는 변수
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val myBookShelfButton = view.findViewById<Button>(R.id.myBookShelfButton)
+        myBookShelfButton.setOnClickListener {
+            val fragment = FragmentCamBook()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(
+                    R.id.container,
+                    fragment
+                ) // 'container'는 프래그먼트가 들어갈 레이아웃의 ID입니다. 실제 레이아웃 ID로 변경하세요.
+                .addToBackStack(null)
+                .commit()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragcam, container, false)
-        editText = view.findViewById(R.id.editText) as EditText // editText 초기화
+
+        editTextContainer = view.findViewById(R.id.editTextContainer)
+
+        val addEditTextButton = view.findViewById<Button>(R.id.addEditTextButton)
+        addEditTextButton.setOnClickListener {
+            addEditText()
+        }
+
+        editText = view.findViewById(R.id.editText) as EditText
 
         val cameraButton = view.findViewById<Button>(R.id.cameraButton)
         val galleryButton = view.findViewById<Button>(R.id.galleryButton)
-        val saveButton = view.findViewById<Button>(R.id.camsaveButton) // Save 버튼 추가
-
+        val saveButton = view.findViewById<Button>(R.id.camsaveButton)
 
         val imageView = view.findViewById<ImageView>(R.id.imageView)
         val textView = view.findViewById<TextView>(R.id.ocrResultTextView)
         val editText = view.findViewById<EditText>(R.id.editText) // 텍스트 수정을 위한 EditText
 
+        val sharedPref = activity?.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE)
+        val id = sharedPref?.getString("id", "") ?: ""
+
         cameraButton.setOnClickListener {
             startCamera()
-            imageView.visibility = View.GONE // 이미지뷰 숨기기
-            textView.visibility = View.GONE // 텍스트뷰 숨기기
+            imageView.visibility = View.GONE
+            textView.visibility = View.GONE
         }
 
         galleryButton.setOnClickListener {
             startGallery()
-            imageView.visibility = View.GONE // 이미지뷰 숨기기
-            textView.visibility = View.GONE // 텍스트뷰 숨기기
+            imageView.visibility = View.GONE
+            textView.visibility = View.GONE
         }
 
         saveButton.setOnClickListener {
-            // EditText에서 사용자가 수정한 텍스트를 추출하여 저장
             val modifiedText = editText.text.toString()
-            extractedText = modifiedText
 
-            // 여기서 추출된 텍스트를 저장하고 필요한 후속 작업을 수행합니다.
-            // 예를 들어, 데이터베이스에 저장하거나 다른 처리를 할 수 있습니다.
+            val titles = mutableListOf<String>()
+            val authors = mutableListOf<String>()
 
-            // 수정된 텍스트를 텍스트뷰에 표시하여 사용자에게 보여줍니다.
-            textView.text = modifiedText
-            textView.visibility = View.VISIBLE
-            editText.visibility = View.GONE
+            val title = ArrayList<String>()
+            val author = ArrayList<String>()
 
-            // Save 버튼을 눌렀을 때 서버로 데이터를 전송하도록 처리합니다.
-            saveToDatabase(extractedText)
+            for (i in 0 until editTextContainer.childCount) {
+                val pair = editTextContainer.getChildAt(i) as LinearLayout
+                val titleEditText = pair.findViewById<EditText>(R.id.titleEditText)
+                val authorEditText = pair.findViewById<EditText>(R.id.authorEditText)
+
+                titles.add(titleEditText.text.toString())
+                authors.add(authorEditText.text.toString())
+            }
+
+            // 사용자 아이디 가져오기
+            val sharedPref = activity?.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE)
+            val id = sharedPref?.getString("id", "") ?: ""
+
+            saveToDatabase(id, titles, authors)
         }
         return view
     }
@@ -114,34 +160,41 @@ class FragmentCam : Fragment() {
                 GALLERY_REQUEST_CODE -> {
                     val selectedImageUri = data?.data
                     val imageBitmap =
-                        MediaStore.Images.Media.getBitmap(requireContext().contentResolver, selectedImageUri)
+                        MediaStore.Images.Media.getBitmap(
+                            requireContext().contentResolver,
+                            selectedImageUri
+                        )
                     processImage(imageBitmap)
                 }
             }
         }
     }
 
-    private fun saveToDatabase(text: String) {
-        val apiService = ApiService.create()
-        val data = YourDataModel(text)
+    private fun saveToDatabase(userid: String, titles: List<String>, authors: List<String>) {
+        val texts = mutableListOf<TextData>()
 
+        // texts 리스트에 데이터 추가
+        for (i in titles.indices) {
+            val textData = TextData(titles[i], authors[i])
+            texts.add(textData)
+        }
+
+        val apiService = ApiService.create()
+        val data = YourDataModel(userid, texts)
         val call = apiService.saveToDatabase(data)
+
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
-                    // 서버에 데이터가 성공적으로 저장됨
                     showToast("데이터 저장 성공")
                 } else {
-                    // 서버에 데이터 저장 실패
                     showToast("데이터 저장 실패")
                 }
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
-                // 통신 실패 처리
                 showToast("통신 실패")
                 t.printStackTrace()
-
             }
         })
     }
@@ -154,25 +207,24 @@ class FragmentCam : Fragment() {
 
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
-                // OCR 결과 처리 및 TextView에 출력
                 val ocrText = StringBuilder()
                 for (block in visionText.textBlocks) {
                     for (line in block.lines) {
-                        ocrText.append(line.text).append("\n")
+                        ocrText.append(line.text).append("")
                     }
                 }
 
-                extractedText = ocrText.toString() // 추출된 텍스트 저장
+                extractedText = ocrText.toString()
                 editText.setText(extractedText)
                 editText.visibility = View.VISIBLE
 
                 textView?.visibility = View.GONE
 
                 textView?.text = ocrText.toString()
-                textView?.visibility = View.VISIBLE // 텍스트뷰 보이기
+                textView?.visibility = View.VISIBLE
 
                 imageView?.setImageBitmap(bitmap)
-                imageView?.visibility = View.VISIBLE // 이미지뷰 보이기
+                imageView?.visibility = View.VISIBLE
             }
             .addOnFailureListener { e ->
                 e.printStackTrace()
@@ -181,6 +233,21 @@ class FragmentCam : Fragment() {
 
     private fun showToast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
 
+    private fun addEditText() {
+        val inflater =
+            requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val newEditTextPair = inflater.inflate(R.layout.pair_edit_text, null) as LinearLayout
+
+        // 부모 레이아웃에 새로운 EditText 쌍 추가
+        editTextContainer.addView(newEditTextPair)
+
+        // 새로 추가된 EditText 쌍에 대해 제목과 저자 EditText 추가
+        val titleEditText = newEditTextPair.findViewById<EditText>(R.id.titleEditText)
+        val authorEditText = newEditTextPair.findViewById<EditText>(R.id.authorEditText)
+
+        titleEditTexts.add(titleEditText)
+        authorEditTexts.add(authorEditText)
     }
 }
