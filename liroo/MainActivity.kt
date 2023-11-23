@@ -52,7 +52,13 @@ class MainActivity : AppCompatActivity() {
                 ft.replace(R.id.container, FragmentSearch()).commit()
             }
             2 -> {
-                ft.replace(R.id.container, FragmentCam()).commit()
+                val bookshelfRecognitionModal = CamModalFragment() // 클래스 이름을 소문자로 수정
+                bookshelfRecognitionModal.setOptionClickListener(object : CamModalFragment.OptionClickListener {
+                    override fun onOptionSelected(option: String) {
+                        // 옵션 선택 이벤트 처리
+                    }
+                })
+                bookshelfRecognitionModal.show(supportFragmentManager, "bookshelf_recognition_modal")
             }
             3 -> {
                 ft.replace(R.id.container, FragmentPost()).commit()
