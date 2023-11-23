@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -32,39 +30,39 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="책 제목:"
-            android:textSize="18sp"
-            android:layout_marginTop="16dp"/>
+            android:textSize="18sp" />
 
         <EditText
             android:id="@+id/editTextTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="책 제목을 입력하세요"
+            android:layout_marginTop="8dp"
             android:enabled="false"
-            android:layout_marginTop="8dp" />
+            android:hint="책 제목을 입력하세요" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="저자:"
-            android:textSize="18sp"
-            android:layout_marginTop="16dp"/>
+            android:textSize="18sp" />
 
         <EditText
             android:id="@+id/editTextAuthor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="저자를 입력하세요"
+            android:layout_marginTop="8dp"
             android:enabled="false"
-            android:layout_marginTop="8dp" />
+            android:hint="저자를 입력하세요" />
 
         <Button
             android:id="@+id/saveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="저장"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:text="저장" />
 
     </LinearLayout>
 </ScrollView>

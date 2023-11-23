@@ -9,7 +9,7 @@
         android:id="@+id/topbar"
         android:layout_width="221dp"
         android:layout_height="63dp"
-        android:text=" Liroo"
+        android:text=" LiRoo"
         android:textAlignment="viewStart"
         android:textAllCaps="false"
         android:textSize="50sp"
