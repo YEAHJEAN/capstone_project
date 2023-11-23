@@ -171,7 +171,10 @@ class FragmentInput : Fragment() {
                 put("user_id", userId)
             }
 
-            val requestBody = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), jsonObject.toString())
+            val requestBody = RequestBody.create(
+                "application/json; charset=utf-8".toMediaTypeOrNull(),
+                jsonObject.toString()
+            )
 
             val request = Request.Builder()
                 .url(url)
@@ -194,6 +197,13 @@ class FragmentInput : Fragment() {
                         // 사용자에게 '저장 성공' 메시지를 Toast로 표시
                         GlobalScope.launch(Dispatchers.Main) {
                             Toast.makeText(activity, "저장 성공", Toast.LENGTH_SHORT).show()
+
+                            // 데이터 저장 성공 시 FragmentShelf 이동
+                            val fragmentManager = parentFragmentManager
+                            val fragmentTransaction = fragmentManager.beginTransaction()
+                            fragmentTransaction.replace(R.id.fragment_container, FragmentShelf())
+                            fragmentTransaction.addToBackStack(null) // 선택 사항: 트랜잭션을 백 스택에 추가
+                            fragmentTransaction.commit()
                         }
                     } else {
                         // 실패 시 처리

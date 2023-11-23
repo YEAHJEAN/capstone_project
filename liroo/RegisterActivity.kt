@@ -50,6 +50,7 @@ class RegisterActivity : AppCompatActivity() {
             ""
         }
     }
+
     val PREFERENCE = "com.example.liroo"
 
     @SuppressLint("SuspiciousIndentation")
@@ -99,7 +100,10 @@ class RegisterActivity : AppCompatActivity() {
             val call = api.registerUser(userData)
 
             call.enqueue(object : Callback<RegApiResponse> {
-                override fun onResponse(call: Call<RegApiResponse>, response: Response<RegApiResponse>) {
+                override fun onResponse(
+                    call: Call<RegApiResponse>,
+                    response: Response<RegApiResponse>
+                ) {
                     if (response.isSuccessful) {
                         val apiResponse = response.body()
                         if (apiResponse != null && apiResponse.success) {

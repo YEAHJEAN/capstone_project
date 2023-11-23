@@ -52,84 +52,109 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
 
-        val loginID = findViewById<EditText>(R.id.id)
-        val loginPassword = findViewById<EditText>(R.id.pw)
-        val btnLogin = findViewById<Button>(R.id.lg_login)
-        val btnRegister = findViewById<Button>(R.id.lg_register)
+        val sharedPref = getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE)
+        val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
+        if (isLoggedIn) {
+            // 이미 로그인된 상태라면 메인 화면으로 이동
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else {
+            // 로그인되지 않은 상태라면 로그인 화면 표시
+            setContentView(R.layout.activity_login)
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+            val loginID = findViewById<EditText>(R.id.id)
+            val loginPassword = findViewById<EditText>(R.id.pw)
+            val btnLogin = findViewById<Button>(R.id.lg_login)
+            val btnRegister = findViewById<Button>(R.id.lg_register)
 
-        val api = retrofit.create(LoginApi::class.java)
+            val retrofit = Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
 
-        btnLogin.setOnClickListener {
-            val id = loginID.text.toString()
-            val password = loginPassword.text.toString()
-            val hashedPassword = hashPassword(password) // 입력된 비밀번호를 해싱
+            val api = retrofit.create(LoginApi::class.java)
 
-            if (!isValidPassword(password)) {
-                loginPassword.error = "숫자, 문자, 특수문자 중 2가지 포함(6~15자)를 입력해주세요."
-                return@setOnClickListener
+            btnLogin.setOnClickListener {
+                val id = loginID.text.toString()
+                val password = loginPassword.text.toString()
+                val hashedPassword = hashPassword(password) // 입력된 비밀번호를 해싱
+
+                if (!isValidPassword(password)) {
+                    loginPassword.error = "숫자, 문자, 특수문자 중 2가지 포함(6~15자)를 입력해주세요."
+                    return@setOnClickListener
+                }
+
+                val userData = LoginUserData(id, hashedPassword) // 해싱된 비밀번호로 객체 생성
+                val call = api.loginUser(userData) // 해싱된 비밀번호 객체를 서버로 전송
+
+                call.enqueue(object : Callback<LoginApiResponse> {
+                    override fun onResponse(
+                        call: Call<LoginApiResponse>,
+                        response: Response<LoginApiResponse>
+                    ) {
+                        if (response.isSuccessful) {
+                            val apiResponse = response.body()
+                            if (apiResponse != null && apiResponse.success) {
+                                showMessage("로그인 성공!")
+
+                                val callUserInfo =
+                                    api.getUserInfo("$id:$hashedPassword") // 해싱된 비밀번호로 사용자 정보 가져오기
+
+                                callUserInfo.enqueue(object : Callback<UserInfo> {
+                                    override fun onResponse(
+                                        call: Call<UserInfo>,
+                                        response: Response<UserInfo>
+                                    ) {
+                                        val userInfo = response.body()
+                                        if (userInfo != null) {
+                                            saveUserInfo(
+                                                userInfo.id,
+                                                hashedPassword,
+                                                userInfo.email
+                                            )
+                                            val intent =
+                                                Intent(this@LoginActivity, MainActivity::class.java)
+                                            startActivity(intent)
+                                            finish()  // 현재 액티비티를 종료
+                                        } else {
+                                            showMessage("사용자 정보를 불러오는데 실패했습니다.")
+                                        }
+                                    }
+
+                                    override fun onFailure(call: Call<UserInfo>, t: Throwable) {
+                                        showMessage("오류 발생: " + t.message)
+                                    }
+                                })
+                            } else {
+                                showMessage("로그인 실패")
+                            }
+                        } else {
+                            showMessage("아이디 또는 비밀번호를 확인하세요.")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<LoginApiResponse>, t: Throwable) {
+                        showMessage("오류 발생")
+                    }
+                })
             }
 
-            val userData = LoginUserData(id, hashedPassword) // 해싱된 비밀번호로 객체 생성
-            val call = api.loginUser(userData) // 해싱된 비밀번호 객체를 서버로 전송
-
-            call.enqueue(object : Callback<LoginApiResponse> {
-                override fun onResponse(call: Call<LoginApiResponse>, response: Response<LoginApiResponse>) {
-                    if (response.isSuccessful) {
-                        val apiResponse = response.body()
-                        if (apiResponse != null && apiResponse.success) {
-                            showMessage("로그인 성공!")
-
-                            val callUserInfo = api.getUserInfo("$id:$hashedPassword") // 해싱된 비밀번호로 사용자 정보 가져오기
-
-                            callUserInfo.enqueue(object : Callback<UserInfo> {
-                                override fun onResponse(call: Call<UserInfo>, response: Response<UserInfo>) {
-                                    val userInfo = response.body()
-                                    if (userInfo != null) {
-                                        saveUserInfo(userInfo.id, hashedPassword, userInfo.email)
-                                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                                        startActivity(intent)
-                                    } else {
-                                        showMessage("사용자 정보를 불러오는데 실패했습니다.")
-                                    }
-                                }
-
-                                override fun onFailure(call: Call<UserInfo>, t: Throwable) {
-                                    showMessage("오류 발생: " + t.message)
-                                }
-                            })
-                        } else {
-                            showMessage("로그인 실패")
-                        }
-                    } else {
-                        showMessage("아이디 또는 비밀번호를 확인하세요.")
-                    }
-                }
-
-                override fun onFailure(call: Call<LoginApiResponse>, t: Throwable) {
-                    showMessage("오류 발생")
-                }
-            })
-        }
-
-        btnRegister.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
-            startActivity(intent)
+            btnRegister.setOnClickListener {
+                val intent = Intent(this, RegisterActivity::class.java)
+                startActivity(intent)
+            }
         }
     }
 
-    private fun saveUserInfo(id: String, password: String, email: String) {
+    private fun saveUserInfo(id: String, password: String, email: String, isLoggedIn: Boolean = true) {
         val sharedPref = getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
             putString("id", id)
             putString("password", password)
             putString("email", email)
+            putBoolean("isLoggedIn", isLoggedIn) // 로그인 상태 저장
             apply()
         }
     }

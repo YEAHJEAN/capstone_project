@@ -81,7 +81,10 @@ class UpdatePasswordFragment : Fragment() {
             val call = updatePasswordApi.updateUser(userData)
 
             call.enqueue(object : Callback<RegApiResponseP> {
-                override fun onResponse(call: Call<RegApiResponseP>, response: Response<RegApiResponseP>) {
+                override fun onResponse(
+                    call: Call<RegApiResponseP>,
+                    response: Response<RegApiResponseP>
+                ) {
                     if (response.isSuccessful) {
                         val apiResponse = response.body()
                         if (apiResponse != null && apiResponse.success) {

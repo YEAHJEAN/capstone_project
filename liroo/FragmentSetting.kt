@@ -61,7 +61,7 @@ class FragmentSetting : Fragment() {
         emailEditButton.setOnClickListener {
             val fragmentManager = activity?.supportFragmentManager
             val fragmentTransaction = fragmentManager?.beginTransaction()
-            fragmentTransaction?.replace(R.id.container, UpdateEmailFragment())
+            fragmentTransaction?.replace(R.id.fragment_container, UpdateEmailFragment())
             fragmentTransaction?.addToBackStack(null)
             fragmentTransaction?.commit()
         }
@@ -69,7 +69,7 @@ class FragmentSetting : Fragment() {
         passwordEditButton.setOnClickListener {
             val fragmentManager = activity?.supportFragmentManager
             val fragmentTransaction = fragmentManager?.beginTransaction()
-            fragmentTransaction?.replace(R.id.container, UpdatePasswordFragment())
+            fragmentTransaction?.replace(R.id.fragment_container, UpdatePasswordFragment())
             fragmentTransaction?.addToBackStack(null)
             fragmentTransaction?.commit()
         }
@@ -93,7 +93,10 @@ class FragmentSetting : Fragment() {
                     val deleteCall = deleteApi.deleteUser(deleteUserData)
 
                     deleteCall.enqueue(object : Callback<RegApiResponseS> {
-                        override fun onResponse(call: Call<RegApiResponseS>, response: Response<RegApiResponseS>) {
+                        override fun onResponse(
+                            call: Call<RegApiResponseS>,
+                            response: Response<RegApiResponseS>
+                        ) {
                             if (response.isSuccessful) {
                                 val apiResponse = response.body()
                                 if (apiResponse != null && apiResponse.success) {

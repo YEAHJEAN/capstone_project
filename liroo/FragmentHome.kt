@@ -16,9 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 
 data class Post(
-    val id: String,
-    val title: String,
-    val content: String
+    val id: String, val title: String, val content: String
 )
 
 interface PostApi1 {
@@ -29,9 +27,7 @@ interface PostApi1 {
 class FragmentHome : Fragment() {
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fraghome, container, false)
     }
@@ -42,10 +38,8 @@ class FragmentHome : Fragment() {
         val recyclerView: RecyclerView = view.findViewById(R.id.postRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+        val retrofit = Retrofit.Builder().baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
+            .addConverterFactory(GsonConverterFactory.create()).build()
 
         val postApi1 = retrofit.create(PostApi1::class.java)
 

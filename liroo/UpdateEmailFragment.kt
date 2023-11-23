@@ -68,7 +68,10 @@ class UpdateEmailFragment : Fragment() {
             val call = UpdateEmailApi.updateUser(userData)
 
             call.enqueue(object : Callback<RegApiResponseE> {
-                override fun onResponse(call: Call<RegApiResponseE>, response: Response<RegApiResponseE>) {
+                override fun onResponse(
+                    call: Call<RegApiResponseE>,
+                    response: Response<RegApiResponseE>
+                ) {
                     if (response.isSuccessful) {
                         val apiResponse = response.body()
                         if (apiResponse != null && apiResponse.success) {
