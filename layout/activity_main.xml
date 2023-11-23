@@ -43,7 +43,7 @@
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_weight="1"
-            android:src="@drawable/baseline_photo_camera_white_24"
+            android:src="@drawable/baseline_settings_plus_24"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"/>
 
