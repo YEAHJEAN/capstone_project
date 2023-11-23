@@ -241,14 +241,30 @@ app.post('/delete', (req, res) => {
       return res.status(401).json({ success: false, message: '일치하는 사용자 정보가 없습니다.' });
     }
 
-    // 사용자 정보 삭제
-    db.query('DELETE FROM users WHERE id = ?', [deleteData.id], (error, results) => {
+    // 해당 사용자가 작성한 게시글 삭제
+    db.query('DELETE FROM posts WHERE id = ?', [deleteData.id], (error, results) => {
       if (error) {
         console.error(error);
         return res.status(500).json({ success: false, message: '서버 오류' });
       }
 
-      res.status(200).json({ success: true, message: '사용자 정보가 삭제되었습니다.' });
+      // 해당 사용자의 텍스트 삭제
+      db.query('DELETE FROM texts WHERE user_id = ?', [deleteData.id], (error, results) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ success: false, message: '서버 오류' });
+        }
+
+        // 사용자 정보 삭제
+        db.query('DELETE FROM users WHERE id = ?', [deleteData.id], (error, results) => {
+          if (error) {
+            console.error(error);
+            return res.status(500).json({ success: false, message: '서버 오류' });
+          }
+
+          res.status(200).json({ success: true, message: '사용자 정보가 삭제되었습니다.' });
+        });
+      });
     });
   });
 });
@@ -259,16 +275,15 @@ app.get('/books', (req, res) => {
   const userId = req.query.userId; // 사용자 ID
 
   // 사용자 ID에 해당하는 책 목록을 가져오기 위한 SQL 쿼리
-  const sql = 'SELECT * FROM texts WHERE user_id = ?'; // 쿼리 수정: userId -> user_id
+  const sql = 'SELECT * FROM shelfs WHERE id = ?';
 
   // 데이터베이스에서 책 목록을 가져옵니다.
   db.query(sql, [userId], (err, result) => {
     if (err) {
-      console.error('Error fetching books from database:', err);
-      res.status(500).send('Error fetching books from database');
+      console.error('데이터베이스에서 책 가져오기 오류:', err);
+      res.status(500).send('데이터베이스에서 책 가져오기 오류');
       return;
     }
-
 
     // 책 목록을 JSON 형태로 클라이언트에게 반환합니다.
     res.json(result);
@@ -278,24 +293,42 @@ app.get('/books', (req, res) => {
 
 app.post('/saveToDatabase', (req, res) => {
   const data = req.body;
-      const userid = data.userid;
-      const texts = data.texts;
-  
-      const values = texts.map(({ title, author }) => `('${userid}', '${title}', '${author}')`).join(', ');
-    
-      // MySQL에 정보 삽입
-      const sql = `INSERT INTO texts (user_id, title, author) VALUES ${values}`;
-  
-      db.query(sql, (err, result) => {
-          if (err) {
-              console.error('Error saving data to database:', err);
-              res.status(500).send('Error saving data to database');
-              return;
-          }
-          console.log('Data saved to database');
-          res.status(200).send('Data saved to database');
-      });
+  const userid = data.userid;
+  const texts = data.texts;
+
+  const values = texts.map(({ title, author }) => `('${userid}', '${title}', '${author}')`).join(', ');
+
+  // MySQL에 정보 삽입
+  const sql = `INSERT INTO shelfs (id, title, author) VALUES ${values}`;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error('데이터베이스에 데이터 저장 오류:', err);
+      res.status(500).send('데이터베이스에 데이터 저장 오류');
+      return;
+    }
+    console.log('데이터가 데이터베이스에 저장되었습니다.');
+    res.status(200).send('데이터가 데이터베이스에 저장되었습니다.');
   });
+});
+
+
+app.post('/saveData', (req, res) => {
+  const title = req.body.title;
+  const author = req.body.author;
+  const userId = req.body.user_id;
+
+  const sql = 'INSERT INTO shelf (id, title, author) VALUES (?, ?, ?)';
+  db.query(sql, [userId, title, author], (err, result) => {
+    if (err) {
+      console.error('MySQL에 데이터 저장 오류:', err);
+      res.status(500).send('MySQL에 데이터 저장 오류');
+      return;
+    }
+    console.log('데이터가 MySQL에 저장되었습니다:', result);
+    res.status(200).send('데이터가 성공적으로 저장되었습니다.');
+  });
+});
 
 
 app.listen(port, () => {
