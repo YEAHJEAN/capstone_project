@@ -20,7 +20,8 @@ import retrofit2.http.Query
 
 data class Book(
     val title: String,
-    val author: String
+    val author: String,
+    val isbn: String,
 )
 
 interface BookApi {
@@ -53,7 +54,7 @@ class FragmentShelf : Fragment() {
 
         if (!userId.isNullOrEmpty()) {
             val retrofit = Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
+                .baseUrl("http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/") // 실제 서버 URL로 변경
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
 
@@ -64,7 +65,7 @@ class FragmentShelf : Fragment() {
             call.enqueue(object : Callback<List<Book>> {
                 override fun onResponse(call: Call<List<Book>>, response: Response<List<Book>>) {
                     if (response.isSuccessful) {
-                        val books = response.body()
+                        val books = response.body()?.toMutableList() // toMutableList()를 사용하여 MutableList로 변환
                         books?.let {
                             val bookAdapter = BookAdapter(requireContext(), it)
                             recyclerView.adapter = bookAdapter // RecyclerView에 Adapter 설정

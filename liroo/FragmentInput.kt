@@ -6,13 +6,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ListView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -30,85 +31,77 @@ import java.net.URLEncoder
 class FragmentInput : Fragment() {
 
     private val PREFERENCE = "com.example.liroo" // SharedPreferences 키 값
-
     private val clientId = "f7O8TCH7OQCBPI8XHbhJ"
     private val clientSecret = "DwS8ZW1dsw"
 
     private lateinit var autoCompleteTextView: AutoCompleteTextView
-    private lateinit var resultListView: ListView
+    private lateinit var resultRecyclerView: RecyclerView
     private val client = OkHttpClient()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        resultListView = view.findViewById<ListView>(R.id.resultListView)
+        resultRecyclerView = view.findViewById(R.id.resultRecyclerView)
         autoCompleteTextView = view.findViewById(R.id.autoCompleteTextView)
 
         val saveButton = view.findViewById<Button>(R.id.saveButton)
         saveButton.setOnClickListener {
             val editTextTitle = view.findViewById<EditText>(R.id.editTextTitle)
             val editTextAuthor = view.findViewById<EditText>(R.id.editTextAuthor)
+            val editTextIsbn = view.findViewById<EditText>(R.id.editTextIsbn)
 
             val title = editTextTitle.text.toString().trim()
             val author = editTextAuthor.text.toString().trim()
+            val isbn = editTextIsbn.text.toString().trim()
 
-            if (title.isNotEmpty() && author.isNotEmpty()) {
-                // 서버에 데이터 저장 함수 호출 (사용자 ID와 데이터 전달)
-                saveToServer(title, author)
+            if (title.isNotEmpty() && author.isNotEmpty() && isbn.isNotEmpty()) {
+                saveToServer(title, author, isbn)
             } else {
-                // 제목 또는 저자가 비어있는 경우 처리
-                // 예를 들어 사용자에게 오류 메시지 표시
+                // Handle empty fields, show error message to the user if needed
             }
         }
 
-        // 결과 목록에서 항목을 선택할 때의 동작을 정의합니다.
-        resultListView.setOnItemClickListener { parent, _, position, _ ->
-            val selectedItem = parent.getItemAtPosition(position) as String
+        resultRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        val adapter = BookAdapter(mutableListOf()) { selectedItem ->
             processSelectedItem(selectedItem)
+        }
+        resultRecyclerView.adapter = adapter
+
+        val searchButton = view.findViewById<Button>(R.id.searchButton)
+        searchButton.setOnClickListener {
+            val query = autoCompleteTextView.text.toString()
+            if (query.isNotEmpty()) {
+                fetchRelatedBooks(query)
+            }
         }
     }
 
     private fun processSelectedItem(selectedItem: String) {
-        // 선택한 항목을 가공하여 원하는 데이터 추출
-        val selectedTitle = selectedItem.split(" - ")[0] // 제목만 추출
-        val selectedAuthor = selectedItem.split(" - ")[1] // 저자만 추출
+        val selectedTitle = selectedItem.split(" - ")[0]
+        val selectedAuthor = selectedItem.split(" - ")[1]
+        val selectedIsbn = selectedItem.split(" - ")[2]
 
-        // 선택한 데이터를 처리하거나 표시할 수 있도록 원하는 작업을 수행합니다.
-        Log.d("FragmentInput", "Selected Title: $selectedTitle")
-        Log.d("FragmentInput", "Selected Author: $selectedAuthor")
-
-        // 선택한 제목과 저자를 EditText 등에 표시하여 사용자가 수정할 수 있도록 합니다.
         val editTextTitle = view?.findViewById<EditText>(R.id.editTextTitle)
         val editTextAuthor = view?.findViewById<EditText>(R.id.editTextAuthor)
+        val editTextIsbn = view?.findViewById<EditText>(R.id.editTextIsbn)
 
         editTextTitle?.setText(selectedTitle)
         editTextAuthor?.setText(selectedAuthor)
+        editTextIsbn?.setText(selectedIsbn)
 
-        // 사용자가 정보를 수정할 수 있도록 EditText를 활성화시킵니다.
         editTextTitle?.isEnabled = true
         editTextAuthor?.isEnabled = true
+        editTextIsbn?.isEnabled = true
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fraginput, container, false)
-
-        autoCompleteTextView = view.findViewById(R.id.autoCompleteTextView)
-        val searchButton = view.findViewById<Button>(R.id.searchButton)
-
-        searchButton.setOnClickListener {
-            val query = autoCompleteTextView.text.toString()
-            if (query.isNotEmpty()) {
-                fetchRelatedKeywords(query)
-            }
-        }
-
-        return view
+        return inflater.inflate(R.layout.fraginput, container, false)
     }
 
-    private fun fetchRelatedKeywords(query: String) {
+    private fun fetchRelatedBooks(query: String) {
         val encodedQuery = URLEncoder.encode(query, "UTF-8")
         val url = "https://openapi.naver.com/v1/search/book?query=$encodedQuery"
 
@@ -120,7 +113,7 @@ class FragmentInput : Fragment() {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.e("SearchFragment", "Error: ${e.message}")
+                Log.e("FragmentInput", "Error: ${e.message}")
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -137,37 +130,35 @@ class FragmentInput : Fragment() {
                             val itemObject = itemsArray.getJSONObject(i)
                             val title = itemObject.getString("title")
                             val author = itemObject.getString("author")
-                            val displayText = "$title - $author"
+                            val isbn = itemObject.getString("isbn")
+                            val displayText = "$title - $author - $isbn"
                             resultList.add(displayText)
                         }
 
                         GlobalScope.launch(Dispatchers.Main) {
-                            val adapter = ArrayAdapter(
-                                requireContext(),
-                                android.R.layout.simple_list_item_1,
-                                resultList
-                            )
-                            resultListView.adapter = adapter
+                            val adapter = BookAdapter(resultList) { selectedItem ->
+                                processSelectedItem(selectedItem)
+                            }
+                            resultRecyclerView.adapter = adapter
                         }
                     } else {
-                        Log.e("SearchFragment", "No 'items' field in the JSON response")
+                        Log.e("FragmentInput", "No 'items' field in the JSON response")
                     }
                 }
             }
         })
     }
 
-    private fun saveToServer(title: String, author: String) {
-        val userId = getUserId() // 사용자 ID 가져오기
+    private fun saveToServer(title: String, author: String, isbn: String) {
+        val userId = getUserId()
 
-        if (userId != null && title.isNotEmpty() && author.isNotEmpty()) {
-            // 서버의 엔드포인트 URL을 적절히 변경하세요
-            val url = "http://10.0.2.2:3001/saveData"
+        if (userId != null && title.isNotEmpty() && author.isNotEmpty() && isbn.isNotEmpty()) {
+            val url = "http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/saveData"
 
-            // 제목과 저자를 JSON 객체로 생성
             val jsonObject = JSONObject().apply {
                 put("title", title)
                 put("author", author)
+                put("isbn", isbn)
                 put("user_id", userId)
             }
 
@@ -179,47 +170,64 @@ class FragmentInput : Fragment() {
             val request = Request.Builder()
                 .url(url)
                 .post(requestBody)
-                // 필요한 경우 헤더 추가
                 .build()
 
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     Log.e("FragmentInput", "Error: ${e.message}")
-                    // 실패 시 처리하거나 오류 메시지 표시
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     if (response.isSuccessful) {
-                        // 성공 시 처리
-                        // 예를 들어 성공 메시지 표시 또는 다른 작업 수행
-                        Log.d("FragmentInput", "데이터 저장 성공")
-
-                        // 사용자에게 '저장 성공' 메시지를 Toast로 표시
                         GlobalScope.launch(Dispatchers.Main) {
                             Toast.makeText(activity, "저장 성공", Toast.LENGTH_SHORT).show()
 
-                            // 데이터 저장 성공 시 FragmentShelf 이동
                             val fragmentManager = parentFragmentManager
                             val fragmentTransaction = fragmentManager.beginTransaction()
                             fragmentTransaction.replace(R.id.fragment_container, FragmentShelf())
-                            fragmentTransaction.addToBackStack(null) // 선택 사항: 트랜잭션을 백 스택에 추가
+                            fragmentTransaction.addToBackStack(null)
                             fragmentTransaction.commit()
                         }
                     } else {
-                        // 실패 시 처리
-                        // 예를 들어 오류 메시지 표시 또는 다른 작업 수행
                         Log.e("FragmentInput", "데이터 저장 실패")
                     }
                 }
             })
         } else {
-            // 사용자 ID, 제목 또는 저자가 비어있는 경우 처리
-            // 예를 들어 사용자에게 오류 메시지 표시
+            // Handle empty fields or user ID being null, show error message if needed
         }
     }
 
     private fun getUserId(): String? {
         val sharedPref = activity?.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE)
         return sharedPref?.getString("id", null)
+    }
+
+    private class BookAdapter(
+        private val itemList: MutableList<String>,
+        private val itemClickListener: (String) -> Unit
+    ) : RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
+
+        class BookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val bookTextView: TextView = itemView.findViewById(R.id.bookTextView)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_book, parent, false)
+            return BookViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: BookViewHolder, position: Int) {
+            val currentItem = itemList[position]
+            holder.bookTextView.text = currentItem
+            holder.itemView.setOnClickListener {
+                itemClickListener(currentItem)
+            }
+        }
+
+        override fun getItemCount(): Int {
+            return itemList.size
+        }
     }
 }
