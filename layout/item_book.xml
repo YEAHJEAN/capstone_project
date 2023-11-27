@@ -5,18 +5,16 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- 도서 정보 표시를 위한 TextView -->
     <TextView
-        android:id="@+id/textTitle"
+        android:id="@+id/bookTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp"/>
 
-    <TextView
-        android:id="@+id/textContent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textSize="14sp" />
+    <!-- 필요한 다른 뷰 요소들을 추가할 수 있습니다. -->
+    <!-- 예: 작가, ISBN 등 -->
 
 </LinearLayout>

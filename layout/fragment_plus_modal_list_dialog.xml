@@ -9,16 +9,21 @@
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_weight="1"
-        android:background="#333333"
+        android:background="#303030"
         android:text="책장 인식"
         android:textColor="#FFFFFF" />
+
+    <View
+        android:layout_width="3dp"
+        android:layout_height="match_parent"
+        android:background="#5A595B" />
 
     <Button
         android:id="@+id/btn_direct_input"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_weight="1"
-        android:background="#333333"
+        android:background="#303030"
         android:text="직접 입력"
         android:textColor="#FFFFFF" />
 </LinearLayout>

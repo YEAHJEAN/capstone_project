@@ -27,4 +27,34 @@
         android:paddingTop="4dp"
         android:textSize="16sp" />
 
+    <TextView
+        android:id="@+id/bookIsbn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="0dp"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:id="@+id/buttonLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_marginTop="8dp">
+
+        <!-- 원하는 버튼 추가 -->
+        <Button
+            android:id="@+id/postButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="게시물 작성"
+            android:layout_marginEnd="8dp" />
+
+        <!-- 책 정보 수정 버튼 추가 -->
+        <Button
+            android:id="@+id/editButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="책 정보 수정" />
+    </LinearLayout>
 </LinearLayout>
