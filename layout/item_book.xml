@@ -10,9 +10,9 @@
         android:id="@+id/bookTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
         android:textSize="16sp"
-        android:textStyle="bold"
-        android:paddingBottom="8dp"/>
+        android:textStyle="bold" />
 
     <!-- 필요한 다른 뷰 요소들을 추가할 수 있습니다. -->
     <!-- 예: 작가, ISBN 등 -->

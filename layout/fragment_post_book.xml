@@ -16,7 +16,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:hint="Title"
+        android:hint="제목을 입력하세요."
         android:inputType="text" />
 
     <EditText
@@ -27,7 +27,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:hint="Content"
+        android:hint="내용을 입력하세요."
         android:inputType="textMultiLine"
         android:minLines="5" />
 
@@ -49,6 +49,6 @@
         android:layout_below="@id/editTextIsbn"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:text="Post" />
+        android:text="게시물 작성" />
 
 </RelativeLayout>
