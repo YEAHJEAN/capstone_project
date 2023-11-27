@@ -62,10 +62,6 @@ class FragmentInput : Fragment() {
         }
 
         resultRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = BookAdapter(mutableListOf()) { selectedItem ->
-            processSelectedItem(selectedItem)
-        }
-        resultRecyclerView.adapter = adapter
 
         val searchButton = view.findViewById<Button>(R.id.searchButton)
         searchButton.setOnClickListener {
@@ -92,6 +88,9 @@ class FragmentInput : Fragment() {
         editTextTitle?.isEnabled = true
         editTextAuthor?.isEnabled = true
         editTextIsbn?.isEnabled = true
+
+        // Clear the RecyclerView
+        resultRecyclerView.adapter = null
     }
 
     override fun onCreateView(
@@ -139,6 +138,7 @@ class FragmentInput : Fragment() {
                             val adapter = BookAdapter(resultList) { selectedItem ->
                                 processSelectedItem(selectedItem)
                             }
+                            // Set the RecyclerView adapter with the search result
                             resultRecyclerView.adapter = adapter
                         }
                     } else {
@@ -153,7 +153,7 @@ class FragmentInput : Fragment() {
         val userId = getUserId()
 
         if (userId != null && title.isNotEmpty() && author.isNotEmpty() && isbn.isNotEmpty()) {
-            val url = "http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/saveData"
+            val url = "http://10.0.2.2:3001/saveData"
 
             val jsonObject = JSONObject().apply {
                 put("title", title)

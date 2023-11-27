@@ -16,7 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 
 data class Post(
-    val id: String, val title: String, val content: String
+    val user_id: String, val title: String, val content: String
 )
 
 interface PostApi1 {
@@ -38,7 +38,7 @@ class FragmentHome : Fragment() {
         val recyclerView: RecyclerView = view.findViewById(R.id.postRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val retrofit = Retrofit.Builder().baseUrl("http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/") // 실제 서버 URL로 변경
+        val retrofit = Retrofit.Builder().baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
             .addConverterFactory(GsonConverterFactory.create()).build()
 
         val postApi1 = retrofit.create(PostApi1::class.java)

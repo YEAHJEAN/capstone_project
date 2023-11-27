@@ -77,12 +77,6 @@ class BookAdapter(
         // 게시물 작성 버튼 클릭 이벤트 처리
         val postButton = holder.itemView.findViewById<Button>(R.id.postButton)
         postButton.setOnClickListener {
-            Toast.makeText(
-                holder.itemView.context,
-                "게시물 작성 버튼이 클릭되었습니다.",
-                Toast.LENGTH_SHORT
-            ).show()
-
             // 버튼 숨기기
             holder.buttonLayout.visibility = View.GONE
 
@@ -106,12 +100,6 @@ class BookAdapter(
         // 책 정보 수정 버튼 클릭 이벤트 처리
         val editButton = holder.itemView.findViewById<Button>(R.id.editButton)
         editButton.setOnClickListener {
-            Toast.makeText(
-                holder.itemView.context,
-                "책 정보 수정 버튼이 클릭되었습니다.",
-                Toast.LENGTH_SHORT
-            ).show()
-
             // 책 정보 삭제 로직
             deleteBookInfo(currentBook, position) // position 파라미터 추가
 
@@ -130,7 +118,7 @@ class BookAdapter(
 
         if (userId != null) {
             val url =
-                "http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/deleteData"
+                "http://10.0.2.2:3001/deleteData"
 
             val jsonObject = JSONObject().apply {
                 put("title", book.title)

@@ -19,7 +19,7 @@ class PostAdapter(private val context: Context, private val postList: List<Post>
         val currentPost = postList[position]
 
         holder.textTitle.text = currentPost.title
-        holder.textId.text = currentPost.id
+        holder.textId.text = currentPost.user_id
 
         // 리스트 아이템 클릭 리스너 설정
         holder.itemView.setOnClickListener {

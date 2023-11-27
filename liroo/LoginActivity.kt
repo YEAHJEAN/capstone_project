@@ -70,7 +70,7 @@ class LoginActivity : AppCompatActivity() {
             val btnRegister = findViewById<Button>(R.id.lg_register)
 
             val retrofit = Retrofit.Builder()
-                .baseUrl("http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/") // 실제 서버 URL로 변경
+                .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
 

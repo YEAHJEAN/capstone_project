@@ -332,7 +332,7 @@ class FragmentPlus : Fragment() {
         val userId = getUserId() // 사용자 ID 가져오기
 
         if (userId != null && title.isNotEmpty() && author.isNotEmpty() && isbn.isNotEmpty()) {
-            val url = "http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/saveData"
+            val url = "http://10.0.2.2:3001/saveData"
 
             val jsonObject = JSONObject().apply {
                 put("title", title)
