@@ -1,3 +1,5 @@
+package com.example.liroo
+
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
@@ -9,8 +11,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.example.liroo.MainActivity
-import com.example.liroo.R
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
