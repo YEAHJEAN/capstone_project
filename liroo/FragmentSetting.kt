@@ -75,7 +75,7 @@ class FragmentSetting : Fragment() {
         }
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
+            .baseUrl("http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/") // 실제 서버 URL로 변경
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -89,7 +89,6 @@ class FragmentSetting : Fragment() {
                 .setPositiveButton("확인") { dialog, buttonId ->
                     // 확인 버튼을 눌렀을 때의 동작
                     val deleteUserData = DeleteUserData(id)
-
                     val deleteCall = deleteApi.deleteUser(deleteUserData)
 
                     deleteCall.enqueue(object : Callback<RegApiResponseS> {

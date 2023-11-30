@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,9 +19,11 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 data class Book(
-    val title: String,
+    val book_title: String,
     val author: String,
     val isbn: String,
+    val imageUrl: String?, // 이미지 URL을 담을 변수 선언
+    val imagebook: String? // 이미지 URL을 담을 변수 선언
 )
 
 interface BookApi {
@@ -44,7 +46,8 @@ class FragmentShelf : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val recyclerView: RecyclerView = view.findViewById(R.id.bookRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
 
         // SharedPreferences 객체 생성
         userPrefs = requireContext().getSharedPreferences("com.example.liroo", Context.MODE_PRIVATE)
@@ -54,7 +57,7 @@ class FragmentShelf : Fragment() {
 
         if (!userId.isNullOrEmpty()) {
             val retrofit = Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:3001/") // 실제 서버 URL로 변경
+                .baseUrl("http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/") // 실제 서버 URL로 변경
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
 

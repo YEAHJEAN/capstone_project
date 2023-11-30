@@ -38,6 +38,9 @@ class FragmentInput : Fragment() {
     private lateinit var resultRecyclerView: RecyclerView
     private val client = OkHttpClient()
 
+    private var selectedImageUrl: String? = null // 선택된 이미지 URL을 저장하는 변수 추가
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -54,8 +57,8 @@ class FragmentInput : Fragment() {
             val author = editTextAuthor.text.toString().trim()
             val isbn = editTextIsbn.text.toString().trim()
 
-            if (title.isNotEmpty() && author.isNotEmpty() && isbn.isNotEmpty()) {
-                saveToServer(title, author, isbn)
+            if (title.isNotEmpty() && author.isNotEmpty() && isbn.isNotEmpty() && selectedImageUrl != null) {
+                saveToServer(title, author, isbn, selectedImageUrl!!)
             } else {
                 // Handle empty fields, show error message to the user if needed
             }
@@ -72,7 +75,7 @@ class FragmentInput : Fragment() {
         }
     }
 
-    private fun processSelectedItem(selectedItem: String) {
+    private fun processSelectedItem(selectedItem: String, imageUrl: String) {
         val selectedTitle = selectedItem.split(" - ")[0]
         val selectedAuthor = selectedItem.split(" - ")[1]
         val selectedIsbn = selectedItem.split(" - ")[2]
@@ -88,6 +91,8 @@ class FragmentInput : Fragment() {
         editTextTitle?.isEnabled = true
         editTextAuthor?.isEnabled = true
         editTextIsbn?.isEnabled = true
+
+        selectedImageUrl = imageUrl // 선택된 이미지 URL을 변수에 저장
 
         // Clear the RecyclerView
         resultRecyclerView.adapter = null
@@ -125,6 +130,8 @@ class FragmentInput : Fragment() {
 
                         val resultList = mutableListOf<String>()
 
+                        val imageURLList = mutableListOf<String>() // 책 이미지 URL을 저장할 리스트 추가
+
                         for (i in 0 until itemsArray.length()) {
                             val itemObject = itemsArray.getJSONObject(i)
                             val title = itemObject.getString("title")
@@ -132,11 +139,19 @@ class FragmentInput : Fragment() {
                             val isbn = itemObject.getString("isbn")
                             val displayText = "$title - $author - $isbn"
                             resultList.add(displayText)
+
+                            // 이미지 URL 가져오기
+                            val imageURL = itemObject.getString("image")
+                            imageURLList.add(imageURL)
                         }
 
                         GlobalScope.launch(Dispatchers.Main) {
                             val adapter = BookAdapter(resultList) { selectedItem ->
-                                processSelectedItem(selectedItem)
+                                val index = resultList.indexOf(selectedItem)
+                                val imageUrl = imageURLList.getOrNull(index)
+                                imageUrl?.let { url ->
+                                    processSelectedItem(selectedItem, url)
+                                }
                             }
                             // Set the RecyclerView adapter with the search result
                             resultRecyclerView.adapter = adapter
@@ -149,17 +164,19 @@ class FragmentInput : Fragment() {
         })
     }
 
-    private fun saveToServer(title: String, author: String, isbn: String) {
+    private fun saveToServer(title: String, author: String, isbn: String, imageUrl: String) {
         val userId = getUserId()
 
         if (userId != null && title.isNotEmpty() && author.isNotEmpty() && isbn.isNotEmpty()) {
-            val url = "http://10.0.2.2:3001/saveData"
+            val url = "http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/saveData"
+
 
             val jsonObject = JSONObject().apply {
                 put("title", title)
                 put("author", author)
                 put("isbn", isbn)
                 put("user_id", userId)
+                put("imageUrl", imageUrl)
             }
 
             val requestBody = RequestBody.create(

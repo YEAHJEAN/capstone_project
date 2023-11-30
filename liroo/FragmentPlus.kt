@@ -56,6 +56,8 @@ class FragmentPlus : Fragment() {
 
     private val client = OkHttpClient()
 
+    private var selectedImageUrl: String? = null // 선택된 이미지 URL을 저장하는 변수 추가
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -109,9 +111,9 @@ class FragmentPlus : Fragment() {
                 val author = editTextAuthor.text.toString().trim()
                 val isbn = editTextIsbn.text.toString().trim()
 
-                if (title.isNotEmpty() && author.isNotEmpty() && isbn.isNotEmpty()) {
+                if (title.isNotEmpty() && author.isNotEmpty() && isbn.isNotEmpty() && selectedImageUrl != null) {
                     // 서버에 데이터 저장 함수 호출 (사용자 ID와 데이터 전달)
-                    saveToServer(title, author, isbn)
+                    saveToServer(title, author, isbn, selectedImageUrl!!)
                 } else {
                     Toast.makeText(requireContext(), "제목, 저자, ISBN을 모두 입력해주세요.", Toast.LENGTH_SHORT)
                         .show()
@@ -255,7 +257,7 @@ class FragmentPlus : Fragment() {
     }
 
 
-    private fun processSelectedItem(selectedItem: String) {
+    private fun processSelectedItem(selectedItem: String, imageUrl: String) {
         // 선택한 항목을 가공하여 원하는 데이터 추출
         val selectedTitle = selectedItem.split(" - ")[0] // 제목만 추출
         val selectedAuthor = selectedItem.split(" - ")[1] // 저자만 추출
@@ -274,6 +276,8 @@ class FragmentPlus : Fragment() {
         editTextTitle?.isEnabled = true
         editTextAuthor?.isEnabled = true
         editTextIsbn?.isEnabled = true
+
+        selectedImageUrl = imageUrl // 선택된 이미지 URL을 변수에 저장
 
         resultRecyclerView.visibility = View.GONE
     }
@@ -303,20 +307,30 @@ class FragmentPlus : Fragment() {
 
                         val resultList = mutableListOf<String>()
 
+                        val imageURLList = mutableListOf<String>() // 책 이미지 URL을 저장할 리스트 추가
+
                         for (i in 0 until itemsArray.length()) {
                             val itemObject = itemsArray.getJSONObject(i)
                             val title = itemObject.getString("title")
                             val author = itemObject.getString("author")
                             val isbn = itemObject.getString("isbn")
                             val displayText = "$title - $author - $isbn"
-                            resultList.add(displayText)
+                            resultList.add(displayText)// 이미지 URL 가져오기
+
+                            val imageURL = itemObject.getString("image")
+                            imageURLList.add(imageURL)
                         }
 
                         // fetchRelatedKeywords(query) 함수 내부에서 검색 결과를 리사이클러뷰에 표시하는 부분을 추가합니다.
                         GlobalScope.launch(Dispatchers.Main) {
                             val adapter = BookAdapter(resultList) { selectedItem ->
-                                processSelectedItem(selectedItem)
+                                val index = resultList.indexOf(selectedItem)
+                                val imageUrl = imageURLList.getOrNull(index)
+                                imageUrl?.let { url ->
+                                    processSelectedItem(selectedItem, url)
+                                }
                             }
+                            // Set the RecyclerView adapter with the search result
                             resultRecyclerView.adapter = adapter
                         }
                     } else {
@@ -328,17 +342,19 @@ class FragmentPlus : Fragment() {
 
     }
 
-    private fun saveToServer(title: String, author: String, isbn: String) {
+    private fun saveToServer(title: String, author: String, isbn: String, imageUrl: String) {
         val userId = getUserId() // 사용자 ID 가져오기
 
         if (userId != null && title.isNotEmpty() && author.isNotEmpty() && isbn.isNotEmpty()) {
-            val url = "http://10.0.2.2:3001/saveData"
+            val url = "http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/saveData"
 
             val jsonObject = JSONObject().apply {
                 put("title", title)
                 put("author", author)
                 put("isbn", isbn)
                 put("user_id", userId)
+                put("imageUrl", imageUrl)
+
             }
 
             val requestBody = RequestBody.create(

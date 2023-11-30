@@ -7,10 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -34,11 +37,14 @@ class BookAdapter(
 
 ) : RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
 
+    private var expandedPosition = -1
+
     class BookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val bookTitle: TextView = itemView.findViewById(R.id.bookTitle)
         val bookAuthor: TextView = itemView.findViewById(R.id.bookAuthor)
         val bookIsbn: TextView = itemView.findViewById(R.id.bookIsbn)
         val buttonLayout: ViewGroup = itemView.findViewById(R.id.buttonLayout) // 버튼 레이아웃
+        val imageBook: ImageView = itemView.findViewById(R.id.imageBook) // ImageView로 선언된 부분
 
         init {
             // ViewHolder가 만들어질 때 버튼 레이아웃은 일단 숨기기
@@ -59,18 +65,25 @@ class BookAdapter(
     // 뷰 홀더에 데이터 바인딩
     override fun onBindViewHolder(holder: BookViewHolder, position: Int) {
         val currentBook = bookList[position]
+        val imageUrl = currentBook.imageUrl // 이미지 URL 가져오기
+        Glide.with(holder.itemView.context)
+            .load(imageUrl)
+            .diskCacheStrategy(DiskCacheStrategy.NONE) // 캐시 사용 안 함
+            .into(holder.imageBook) // imageBook ImageView에 이미지 설정
 
         // 책 정보를 TextView에 설정
-        holder.bookTitle.text = currentBook.title
+        holder.bookTitle.text = currentBook.book_title
         holder.bookAuthor.text = currentBook.author
         holder.bookIsbn.text = currentBook.isbn
+
         // 리스트 아이템 클릭 시 버튼 레이아웃 표시/숨김 토글
+        val isExpanded = position == expandedPosition
+        holder.buttonLayout.visibility = if (isExpanded) View.VISIBLE else View.GONE
+        holder.itemView.isActivated = isExpanded
+
         holder.itemView.setOnClickListener {
-            if (holder.buttonLayout.visibility == View.VISIBLE) {
-                holder.buttonLayout.visibility = View.GONE // 보이는 상태일 때 클릭하면 사라지게
-            } else {
-                holder.buttonLayout.visibility = View.VISIBLE // 보이지 않는 상태일 때 클릭하면 나타나게
-            }
+            expandedPosition = if (isExpanded) -1 else position
+            notifyDataSetChanged()
         }
 
         // 게시물 작성 버튼 클릭 이벤트 처리
@@ -116,11 +129,10 @@ class BookAdapter(
         val userId = getUserId()
 
         if (userId != null) {
-            val url =
-                "http://10.0.2.2:3001/deleteData"
+            val url = "http://ec2-3-34-240-75.ap-northeast-2.compute.amazonaws.com:3000/deleteData"
 
             val jsonObject = JSONObject().apply {
-                put("title", book.title)
+                put("book_title", book.book_title)
                 put("author", book.author)
                 put("isbn", book.isbn)
                 put("user_id", userId)
