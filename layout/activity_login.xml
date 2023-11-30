@@ -8,19 +8,13 @@
     android:padding="15dp"
     tools:context=".LoginActivity">
 
-    <TextView
+    <ImageView
         android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="135dp"
-        android:ems="10"
-        android:text="LiRoo"
-        android:textAlignment="center"
-        android:textColor="#395144"
-        android:textSize="85sp"
-        android:textStyle="bold"
+        android:layout_width="250dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/logo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints" />
@@ -29,7 +23,7 @@
         android:id="@+id/id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="50dp"
         android:backgroundTint="#395144"
         android:ems="11"
         android:hint="아이디"

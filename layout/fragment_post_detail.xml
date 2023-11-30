@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/round_account_circle_white_24" />
+
+        <TextView
+            android:id="@+id/post_user_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="25sp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/post_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="16dp"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/post_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/post_isbn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="0sp" />
+
+    <TextView
+        android:id="@+id/post_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:textSize="0sp" />
+
+    <!-- 댓글 버튼 -->
+    <ImageButton
+        android:id="@+id/btnComment"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/round_insert_comment_white_24" />
+
+    <!-- 댓글 입력란 -->
+    <LinearLayout
+        android:id="@+id/commentView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/commentEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="댓글을 작성하세요..." />
+
+        <!-- 댓글 제출 버튼 -->
+        <Button
+            android:id="@+id/submitCommentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="댓글 제출" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/commentRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</LinearLayout>

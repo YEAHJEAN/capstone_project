@@ -10,6 +10,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginStart="10dp"
         android:text="내책장"
+        android:textColor="#93786a"
         android:textSize="50sp" />
 
     <androidx.recyclerview.widget.RecyclerView
